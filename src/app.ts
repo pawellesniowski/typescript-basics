@@ -50,7 +50,7 @@ console.log("returnedFrom", returnedFrom);
     return JSON.parse(jsonObj) as Pizza // assertion second method, we use as keyword
   }
   const pizzaPawlaFromJSON = deserializeFromJSON(serialized);
-  console.log(pizzaPawlaFromJSON);
+  // console.log(pizzaPawlaFromJSON);
 
 
 
@@ -81,9 +81,41 @@ console.log("returnedFrom", returnedFrom);
   }
   myPizza = createPizza('Pepperoni', ['small', 'large'], 1);
   myPizza[1] = 'option one';
-  console.log('myPizza', myPizza);
+  // console.log('myPizza', myPizza);
+}());
 
-})();
+// classes:
+(function () {
+  interface PizzaInterface {
+    toppings: string[];
+    name: string;
+    // no private and protected members can be listed in here!!!
+  }
+
+  class Pizza implements PizzaInterface {
+    foo: string = "bar";
+    toppings: string[] = [];
+    constructor(public name: string) {}
+
+    addToppings(...toppings: string[]) {
+      this.toppings = [...this.toppings, ...toppings]
+    }
+
+    getDetails(){
+      console.log(`This is ${this.name} pizza with ${this.toppings.join(', ')}`);
+    }
+
+    static foo () {
+      console.log('static example');
+    }
+  }
+  const myPizza = new Pizza('Pepperoni');
+  myPizza.addToppings('pepperoni', 'tomato');
+
+  Pizza.foo();
+}());
+
+
 
 
 
