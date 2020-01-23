@@ -115,11 +115,166 @@ console.log("returnedFrom", returnedFrom);
   Pizza.foo();
 }());
 
+// 'typeof' Type Queries
+(function () {
+  const john = {
+    name: 'John',
+    age: 33,
+  };
+  type Person = typeof john;
+  const pawel: Person = {
+    name: 'Pawel',
+    age: 37,
+  }
+}());
+
+// 'keyof' Index type queries, type safe lookup
+(function () {
+  const john = {
+    name: 'John',
+    age: 33,
+  };
+
+  type Person = typeof john;
+  type PersonKeys = keyof Person;
+
+  function getProperty<T, K extends keyof T>(obj: T, key: K) {
+    return obj[key];
+  }
+  const personName = getProperty(john, 'name');
+}());
+
+// -- GENERICS --
+(function () {
+  function identity<T>(arg: T):T {
+    return arg;
+  }
+
+  let mySecretIdentity: {<Z>(args: Z): Z} = identity;
+
+  let myIdentity: {<U>(arg: U):U};
+  myIdentity = identity;
+}());
+
+// generic interface for function:
+(function () {
+
+  interface IdentityFn<V> {
+    <V>(args: V):V
+  }
+  function identity<T> (args: T): T {
+    return args;
+  }
+  const identityGenerator:IdentityFn<number> = identity;
+
+}());
+
+// generic classes:
+(function () {
+
+  class GenericNumber<T> { // generics works only on instance side of type
+    zeroValue: T;
+    add: (x: T, y: T) => T;
+  }
+  let myGenericNumber = new GenericNumber<number>();
+  myGenericNumber.zeroValue = 0;
+  myGenericNumber.add = (a,b) => a+b;
+
+}());
+
+// generic constrains:
+(function () {
+  //lets constrain our generic type to members with .length property on them
+  interface Lengthwise {
+    length: number
+  }
+
+  function identity<T extends Lengthwise>(arg: T): T {
+    console.log(arg.length);
+    return arg;
+  }
+
+  identity([1,2,3])
+
+}());
+
+(function () {
+  //lets grab a property from object given its its key
+
+  interface Person {
+    name: string;
+    lastName: string;
+    age: number;
+  }
+  const obj: Person = {
+    name: 'Pawel',
+    lastName: 'Lesniowski',
+    age: 37,
+  };
+
+  function getPropertyByKey<T, K extends keyof T>(obj: T, key: K){
+    return obj[key];
+  }
+  const mySearch = getPropertyByKey(obj, 'name');
+
+}());
 
 
+// Class types:
+(function () {
 
+  interface AnimalType {
+    legs: number;
+    tail: boolean;
+  }
+  class Animal implements AnimalType {
+    constructor(public legs: number, public tail: boolean, public claws: boolean ) {}
+    get description () {
+      return `This Animal has ${this.legs}${this.tail ? ' and a tail.' : '.'} `
+    }
+  }
+  const cat = new Animal(4, true, true);
+  console.log(cat.description);
 
+}());
 
+// Mapped types:
+(function () {
+  interface Person {
+    name: string,
+    age: number,
+  }
+  const person: Person = {
+    name: "pawel",
+    age: 73,
+  }
+}());
 
+// Namespaces:
+  namespace Validation {
+    export interface StringValidator {
+      isAcceptable(s: string): boolean
+    }
 
+    let lettersRegexp = /^[A-Za-z]+$/;
+    let numberRegexp = /^[0-9]+$/;
+
+    export class LettersOnlyValidator implements StringValidator {
+      isAcceptable (s: string) {
+        return lettersRegexp.test(s);
+      }
+    }
+
+    export class ZipCodeValidator implements StringValidator {
+      isAcceptable(s: string) {
+        return s.length === 5 && numberRegexp.test(s);
+      }
+    }
+  }
+
+  let validators: {[key: string]: Validation.StringValidator} = {};
+  validators["ZIP code"] = new Validation.ZipCodeValidator();
+  validators["Letters only"] = new Validation.LettersOnlyValidator();
+
+  console.log('validators: ', validators["ZIP code"].isAcceptable('1234n'));
 
